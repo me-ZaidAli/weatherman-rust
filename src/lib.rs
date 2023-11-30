@@ -2,7 +2,7 @@ use clap::Parser;
 use reader::read_dir;
 use std::error::Error;
 
-use crate::utils::parse_date_from;
+use crate::{reader::reading::DailyReading, utils::parse_date_from};
 
 mod calculate;
 mod reader;
@@ -32,27 +32,39 @@ pub fn run(args: &Arguments) -> Result<(), Box<dyn Error>> {
     let readings = read_dir(&args.path)?;
 
     if let Some(year) = &args.year {
-        let parsed_year = year.parse::<i32>()?;
+        let parsed_year = year.parse::<u16>()?;
+        let monthly_readings_map = readings.get(&parsed_year).unwrap().to_owned();
+
+        let monthly_readings = monthly_readings_map
+            .into_values()
+            .into_iter()
+            .flatten()
+            .collect::<Vec<DailyReading>>();
+
         println!(
             "{}",
-            calculate::YearlyCalculation::calculate(parsed_year, &readings)?
+            calculate::YearlyCalculation::calculate(monthly_readings)
         )
     }
 
     if let Some(year_with_month) = &args.year_with_month {
         let (year, month) = parse_date_from(year_with_month);
 
+        let daily_readings_for_month = readings.get(&year).unwrap().get(&month).unwrap().to_owned();
+
         println!(
             "{}",
-            calculate::MonthlyCalculation::calculate(year, month, &readings)?
+            calculate::MonthlyCalculation::calculate(daily_readings_for_month)
         );
     }
 
     if let Some(year_with_month_for_chart) = &args.year_with_month_for_chart {
         let (year, month) = parse_date_from(year_with_month_for_chart);
 
+        let daily_readings_for_month = readings.get(&year).unwrap().get(&month).unwrap().to_owned();
+
         let monthly_calculations =
-            calculate::MonthlyCalculation::calculate(year, month, &readings)?;
+            calculate::MonthlyCalculation::calculate(daily_readings_for_month);
 
         monthly_calculations.print_chart();
     }
