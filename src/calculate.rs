@@ -1,37 +1,27 @@
-use crate::{reader::reading::DailyReading, utils::date_from};
+use crate::reader::reading::DailyTemperatureReading;
 use chrono::{Datelike, NaiveDate};
 use colored::Colorize;
 use std::fmt;
 
 pub struct YearlyCalculation {
-    highest_temperature_with_date: (String, i8),
-    lowest_temperature_with_date: (String, i8),
-    max_humidity_with_date: (String, u8),
+    highest_temperature_with_date: (NaiveDate, i8),
+    lowest_temperature_with_date: (NaiveDate, i8),
+    max_humidity_with_date: (NaiveDate, u8),
 }
 
 impl YearlyCalculation {
-    pub fn calculate(monthly_readings: Vec<DailyReading>) -> Self {
+    pub fn calculate(monthly_readings: Vec<DailyTemperatureReading>) -> Self {
         Self {
             highest_temperature_with_date: monthly_readings
                 .iter()
                 .filter(|reading| reading.max_temperature.is_some() && reading.date.is_some())
-                .map(|reading| {
-                    (
-                        reading.date.clone().unwrap(),
-                        reading.max_temperature.unwrap(),
-                    )
-                })
+                .map(|reading| (reading.date.unwrap(), reading.max_temperature.unwrap()))
                 .max_by_key(|reading| reading.1)
                 .unwrap(),
             lowest_temperature_with_date: monthly_readings
                 .iter()
                 .filter(|reading| reading.min_temperature.is_some())
-                .map(|reading| {
-                    (
-                        reading.date.clone().unwrap(),
-                        reading.min_temperature.unwrap(),
-                    )
-                })
+                .map(|reading| (reading.date.unwrap(), reading.min_temperature.unwrap()))
                 .max_by_key(|reading| reading.1)
                 .unwrap(),
             max_humidity_with_date: monthly_readings
@@ -56,11 +46,11 @@ impl fmt::Display for YearlyCalculation {
         let result = format!(
             "Highest: {}C on {}\nLowest: {}C on {}\nHumid: {}% on {}",
             highest_temperature,
-            date_from(date_for_highest_temperature).format(date_format),
+            date_for_highest_temperature.format(date_format),
             lowest_temperature,
-            date_from(date_for_lowest_temperature).format(date_format),
+            date_for_lowest_temperature.format(date_format),
             max_humidity,
-            date_from(date_for_max_humidity).format(date_format),
+            date_for_max_humidity.format(date_format),
         );
 
         write!(f, "{}", result)
@@ -71,11 +61,11 @@ pub struct MonthlyCalculation {
     highest_mean_temperature: i8,
     lowest_mean_temperature: i8,
     average_humidity: u16,
-    readings_for_chart: Vec<DailyReading>, // (day, min temp, max temp),
+    readings_for_chart: Vec<DailyTemperatureReading>, // (day, min temp, max temp),
 }
 
 impl MonthlyCalculation {
-    pub fn calculate(daily_readings_for_month: Vec<DailyReading>) -> Self {
+    pub fn calculate(daily_readings_for_month: Vec<DailyTemperatureReading>) -> Self {
         Self {
             highest_mean_temperature: daily_readings_for_month
                 .iter()
@@ -102,35 +92,39 @@ impl MonthlyCalculation {
     }
 
     pub fn print_chart(&self) {
-        for (index, reading) in self.readings_for_chart.iter().enumerate() {
-            let date = date_from(&reading.date.as_ref().unwrap());
+        println!(
+            "{}",
+            self.readings_for_chart
+                .get(0)
+                .unwrap()
+                .date
+                .unwrap()
+                .format("%B %Y")
+        );
 
-            if index == 0 {
-                println!("{}", date.format("%B %Y").to_string())
-            }
+        for reading in self.readings_for_chart.iter() {
+            let day_number = reading.date.unwrap().day0() + 1;
 
-            Self::print_temperature_bar(reading.max_temperature, date, "red");
-            Self::print_temperature_bar(reading.min_temperature, date, "blue");
+            Self::print_temperature_bar(reading.max_temperature, day_number, "red");
+            Self::print_temperature_bar(reading.min_temperature, day_number, "blue");
         }
     }
 
-    fn print_temperature_bar(temperature: Option<i8>, date: NaiveDate, color: &str) {
+    fn print_temperature_bar(temperature: Option<i8>, day_number: u32, color: &str) {
         if temperature.is_some() {
-            for i in 0..(temperature.unwrap()) {
-                if i == 0 {
-                    print!("{} ", date.day0() + 1);
-                }
+            let temperature = temperature.unwrap() as usize;
+            let temperature_bar = "+".repeat(temperature);
 
-                if color == "red" {
-                    print!("{}", "+".red());
+            println!(
+                "{day_number} {bar} {temperature}C",
+                bar = if color == "red" {
+                    temperature_bar.red()
                 } else {
-                    print!("{}", "+".blue());
+                    temperature_bar.blue()
                 }
-            }
-
-            println!(" {}C", temperature.unwrap());
+            );
         } else {
-            println!("{} No available reading", date.day0() + 1);
+            println!("{} No available reading", day_number);
         }
     }
 }

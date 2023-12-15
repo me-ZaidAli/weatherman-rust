@@ -1,5 +1,6 @@
+use chrono::Datelike;
 use csv;
-use reading::DailyReading;
+use reading::DailyTemperatureReading;
 use std::{
     collections::{hash_map::Entry, HashMap},
     error::Error,
@@ -12,8 +13,9 @@ pub mod reading;
 
 pub fn read_dir(
     path: &str,
-) -> Result<HashMap<u16, HashMap<u16, Vec<DailyReading>>>, Box<dyn Error>> {
-    let mut yearly_readings: HashMap<u16, HashMap<u16, Vec<DailyReading>>> = HashMap::new();
+) -> Result<HashMap<u16, HashMap<u16, Vec<DailyTemperatureReading>>>, Box<dyn Error>> {
+    let mut yearly_readings: HashMap<u16, HashMap<u16, Vec<DailyTemperatureReading>>> =
+        HashMap::new();
 
     for entry in fs::read_dir(path)? {
         let path = entry?.path();
@@ -35,25 +37,20 @@ pub fn read_dir(
     Ok(yearly_readings)
 }
 
-fn read_file(path: &PathBuf) -> Result<(u16, u16, Vec<DailyReading>), Box<dyn Error>> {
+fn read_file(path: &PathBuf) -> Result<(u16, u16, Vec<DailyTemperatureReading>), Box<dyn Error>> {
     let mut rdr = csv::Reader::from_path(path)?;
 
-    let mut daily_readings: Vec<DailyReading> = vec![];
+    let mut daily_readings: Vec<DailyTemperatureReading> = vec![];
 
     let mut month = 0;
     let mut year = 0;
 
     for result in rdr.deserialize() {
-        let record: DailyReading = result?;
+        let record: DailyTemperatureReading = result?;
 
         if let Some(date) = &record.date {
-            let date_split = date
-                .split('-')
-                .map(|word| word.parse::<i32>().unwrap())
-                .collect::<Vec<i32>>();
-
-            year = date_split[0] as u16;
-            month = date_split[1] as u16;
+            year = date.year() as u16;
+            month = date.month() as u16;
         };
 
         daily_readings.push(record);

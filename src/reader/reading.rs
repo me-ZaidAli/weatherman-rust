@@ -1,11 +1,11 @@
+use chrono::NaiveDate;
 use serde::Deserialize;
-
 #[derive(Debug, Eq, Ord, PartialEq, PartialOrd, Clone, Deserialize)]
 #[serde(rename_all = "PascalCase")]
 
-pub struct DailyReading {
+pub struct DailyTemperatureReading {
     #[serde(deserialize_with = "csv::invalid_option", rename = "PKT")]
-    pub date: Option<String>,
+    pub date: Option<NaiveDate>,
     #[serde(deserialize_with = "csv::invalid_option", rename = "Max TemperatureC")]
     pub max_temperature: Option<i8>,
     #[serde(deserialize_with = "csv::invalid_option", rename = "Mean TemperatureC")]

@@ -2,7 +2,7 @@ use clap::Parser;
 use reader::read_dir;
 use std::error::Error;
 
-use crate::{reader::reading::DailyReading, utils::parse_date_from};
+use crate::{reader::reading::DailyTemperatureReading, utils::parse_date_from};
 
 mod calculate;
 mod reader;
@@ -12,7 +12,7 @@ mod utils;
 pub struct Arguments {
     #[arg(short = 'e')]
     /// for a given year display the highest temperature and day, lowest temperature and day, most humid day and humidity
-    pub year: Option<String>,
+    pub year: Option<u16>,
 
     #[arg(short = 'a')]
     /// for a given month display the average highest temperature, average lowest temperature, average humidity
@@ -32,14 +32,13 @@ pub fn run(args: &Arguments) -> Result<(), Box<dyn Error>> {
     let readings = read_dir(&args.path)?;
 
     if let Some(year) = &args.year {
-        let parsed_year = year.parse::<u16>()?;
-        let monthly_readings_map = readings.get(&parsed_year).unwrap().to_owned();
+        let monthly_readings_map = readings.get(year).unwrap().to_owned();
 
         let monthly_readings = monthly_readings_map
             .into_values()
             .into_iter()
             .flatten()
-            .collect::<Vec<DailyReading>>();
+            .collect::<Vec<DailyTemperatureReading>>();
 
         println!(
             "{}",

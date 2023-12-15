@@ -15,8 +15,10 @@ fn validate_format_for(date: &str) {
 
 pub fn validate(input: &Arguments) {
     if let Some(year) = &input.year {
-        for ch in year.chars() {
-            if !ch.is_numeric() || year.len() < 4 {
+        let year_str = year.to_string();
+
+        for ch in year_str.chars() {
+            if !ch.is_numeric() || year_str.len() < 4 {
                 println!("{}", "Please provide year in format YYYY".red());
                 process::exit(0)
             }
