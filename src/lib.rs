@@ -49,21 +49,22 @@ pub fn run(args: &Arguments) -> Result<(), Box<dyn Error>> {
     if let Some(year_with_month) = &args.year_with_month {
         let (year, month) = parse_date_from(year_with_month);
 
-        let daily_readings_for_month = readings.get(&year).unwrap().get(&month).unwrap().to_owned();
+        let yearly_readings = readings.get(&year).unwrap();
+        let monthly_readings = yearly_readings.get(&month).unwrap().to_owned();
 
         println!(
             "{}",
-            calculate::MonthlyCalculation::calculate(daily_readings_for_month)
+            calculate::MonthlyCalculation::calculate(monthly_readings)
         );
     }
 
     if let Some(year_with_month_for_chart) = &args.year_with_month_for_chart {
         let (year, month) = parse_date_from(year_with_month_for_chart);
 
-        let daily_readings_for_month = readings.get(&year).unwrap().get(&month).unwrap().to_owned();
+        let yearly_readings = readings.get(&year).unwrap();
+        let monthly_readings = yearly_readings.get(&month).unwrap().to_owned();
 
-        let monthly_calculations =
-            calculate::MonthlyCalculation::calculate(daily_readings_for_month);
+        let monthly_calculations = calculate::MonthlyCalculation::calculate(monthly_readings);
 
         monthly_calculations.print_chart();
     }

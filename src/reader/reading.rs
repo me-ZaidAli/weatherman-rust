@@ -4,8 +4,8 @@ use serde::Deserialize;
 #[serde(rename_all = "PascalCase")]
 
 pub struct DailyTemperatureReading {
-    #[serde(deserialize_with = "csv::invalid_option", rename = "PKT")]
-    pub date: Option<NaiveDate>,
+    #[serde(rename = "PKT")]
+    pub date: NaiveDate,
     #[serde(deserialize_with = "csv::invalid_option", rename = "Max TemperatureC")]
     pub max_temperature: Option<i8>,
     #[serde(deserialize_with = "csv::invalid_option", rename = "Mean TemperatureC")]

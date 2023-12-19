@@ -46,14 +46,14 @@ fn read_file(path: &PathBuf) -> Result<(u16, u16, Vec<DailyTemperatureReading>),
     let mut year = 0;
 
     for result in rdr.deserialize() {
-        let record: DailyTemperatureReading = result?;
+        if result.is_ok() {
+            let record: DailyTemperatureReading = result.unwrap();
 
-        if let Some(date) = &record.date {
-            year = date.year() as u16;
-            month = date.month() as u16;
-        };
+            year = record.date.year() as u16;
+            month = record.date.month() as u16;
 
-        daily_readings.push(record);
+            daily_readings.push(record);
+        }
     }
 
     Ok((year, month, daily_readings))

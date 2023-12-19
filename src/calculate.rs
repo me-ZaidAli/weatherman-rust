@@ -14,20 +14,20 @@ impl YearlyCalculation {
         Self {
             highest_temperature_with_date: monthly_readings
                 .iter()
-                .filter(|reading| reading.max_temperature.is_some() && reading.date.is_some())
-                .map(|reading| (reading.date.unwrap(), reading.max_temperature.unwrap()))
+                .filter(|reading| reading.max_temperature.is_some())
+                .map(|reading| (reading.date, reading.max_temperature.unwrap()))
                 .max_by_key(|reading| reading.1)
                 .unwrap(),
             lowest_temperature_with_date: monthly_readings
                 .iter()
                 .filter(|reading| reading.min_temperature.is_some())
-                .map(|reading| (reading.date.unwrap(), reading.min_temperature.unwrap()))
+                .map(|reading| (reading.date, reading.min_temperature.unwrap()))
                 .max_by_key(|reading| reading.1)
                 .unwrap(),
             max_humidity_with_date: monthly_readings
                 .iter()
                 .filter(|reading| reading.max_humidity.is_some())
-                .map(|reading| (reading.date.clone().unwrap(), reading.max_humidity.unwrap()))
+                .map(|reading| (reading.date, reading.max_humidity.unwrap()))
                 .max_by_key(|reading| reading.1)
                 .unwrap(),
         }
@@ -94,16 +94,11 @@ impl MonthlyCalculation {
     pub fn print_chart(&self) {
         println!(
             "{}",
-            self.readings_for_chart
-                .get(0)
-                .unwrap()
-                .date
-                .unwrap()
-                .format("%B %Y")
+            self.readings_for_chart.get(0).unwrap().date.format("%B %Y")
         );
 
         for reading in self.readings_for_chart.iter() {
-            let day_number = reading.date.unwrap().day0() + 1;
+            let day_number = reading.date.day0() + 1;
 
             Self::print_temperature_bar(reading.max_temperature, day_number, "red");
             Self::print_temperature_bar(reading.min_temperature, day_number, "blue");
