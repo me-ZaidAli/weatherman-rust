@@ -15,7 +15,7 @@ pub struct DailyTemperatureReading {
     #[serde(deserialize_with = "csv::invalid_option", rename = "Max Humidity")]
     pub max_humidity: Option<u8>,
     #[serde(deserialize_with = "csv::invalid_option", rename = "Mean Humidity")]
-    pub mean_humidity: Option<u16>,
+    pub mean_humidity: Option<u8>,
     #[serde(deserialize_with = "csv::invalid_option", rename = "Min Humidity")]
     pub min_humidity: Option<u8>,
 }

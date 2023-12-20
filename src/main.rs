@@ -7,10 +7,8 @@ use weatherman::{run, Arguments};
 fn validate_format_for(date: &str) {
     let full_date = format!("{}/01", date);
 
-    NaiveDate::parse_from_str(&full_date, "%Y/%m/%d").unwrap_or_else(|_| {
-        println!("{}", "Provided date should be in YYYY/MM format".red());
-        process::exit(0)
-    });
+    NaiveDate::parse_from_str(&full_date, "%Y/%m/%d")
+        .expect(&"Provided date should be in YYYY/MM format".red().to_string());
 }
 
 pub fn validate(input: &Arguments) {

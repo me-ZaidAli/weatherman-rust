@@ -42,7 +42,7 @@ pub fn run(args: &Arguments) -> Result<(), Box<dyn Error>> {
 
         println!(
             "{}",
-            calculate::YearlyCalculation::calculate(monthly_readings)
+            calculate::YearlyCalculation::calculate(&monthly_readings)
         )
     }
 
@@ -54,7 +54,7 @@ pub fn run(args: &Arguments) -> Result<(), Box<dyn Error>> {
 
         println!(
             "{}",
-            calculate::MonthlyCalculation::calculate(monthly_readings)
+            calculate::MonthlyCalculation::calculate(&monthly_readings)
         );
     }
 
@@ -64,7 +64,7 @@ pub fn run(args: &Arguments) -> Result<(), Box<dyn Error>> {
         let yearly_readings = readings.get(&year).unwrap();
         let monthly_readings = yearly_readings.get(&month).unwrap().to_owned();
 
-        let monthly_calculations = calculate::MonthlyCalculation::calculate(monthly_readings);
+        let monthly_calculations = calculate::MonthlyCalculation::calculate(&monthly_readings);
 
         monthly_calculations.print_chart();
     }
