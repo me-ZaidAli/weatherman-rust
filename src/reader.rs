@@ -39,20 +39,26 @@ pub fn read_dir(
 
 fn read_file(path: &PathBuf) -> Result<(u16, u16, Vec<DailyTemperatureReading>), Box<dyn Error>> {
     let mut rdr = csv::Reader::from_path(path)?;
+    let mut iter: csv::DeserializeRecordsIter<'_, fs::File, DailyTemperatureReading> =
+        rdr.deserialize();
 
     let mut daily_readings: Vec<DailyTemperatureReading> = vec![];
 
     let mut month = 0;
     let mut year = 0;
 
-    for result in rdr.deserialize() {
-        if result.is_ok() {
-            let record: DailyTemperatureReading = result.unwrap();
+    if let Some(record) = iter.next() {
+        let result = record.unwrap();
 
-            year = record.date.year() as u16;
-            month = record.date.month() as u16;
+        year = result.date.year() as u16;
+        month = result.date.month() as u16;
 
-            daily_readings.push(record);
+        daily_readings.push(result);
+    }
+
+    for record in iter {
+        if record.is_ok() {
+            daily_readings.push(record.unwrap());
         }
     }
 
