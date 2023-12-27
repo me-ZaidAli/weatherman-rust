@@ -1,5 +1,5 @@
 use crate::{reader::reading::DailyTemperatureReading, utils::parse_date_from};
-use chrono::NaiveDate;
+use chrono::{Datelike, NaiveDate};
 use clap::Parser;
 use colored::Colorize;
 use reader::read_dir;
@@ -54,26 +54,29 @@ pub fn validate_date(year_with_month: &str) -> Result<String, String> {
 pub fn run(args: &Arguments) -> Result<(), Box<dyn Error>> {
     let readings = read_dir(&args.path)?;
 
-    if let Some(year) = &args.year {
-        let monthly_readings_map = readings.get(year).unwrap().to_owned();
-
-        let monthly_readings = monthly_readings_map
-            .into_values()
-            .into_iter()
-            .flatten()
+    if let Some(year) = args.year {
+        let yearly_readings = readings
+            .iter()
+            .filter(|reading| reading.date.year() as u16 == year)
+            .cloned()
             .collect::<Vec<DailyTemperatureReading>>();
 
         println!(
             "{}",
-            calculate::YearlyCalculation::calculate(&monthly_readings)
+            calculate::YearlyCalculation::calculate(&yearly_readings)
         )
     }
 
     if let Some(year_with_month) = &args.year_with_month {
         let (year, month) = parse_date_from(year_with_month);
 
-        let yearly_readings = readings.get(&year).unwrap();
-        let monthly_readings = yearly_readings.get(&month).unwrap().to_owned();
+        let monthly_readings = readings
+            .iter()
+            .filter(|reading| {
+                reading.date.year() as u16 == year && reading.date.month() as u16 == month
+            })
+            .cloned()
+            .collect::<Vec<DailyTemperatureReading>>();
 
         println!(
             "{}",
@@ -84,8 +87,13 @@ pub fn run(args: &Arguments) -> Result<(), Box<dyn Error>> {
     if let Some(year_with_month_for_chart) = &args.year_with_month_for_chart {
         let (year, month) = parse_date_from(year_with_month_for_chart);
 
-        let yearly_readings = readings.get(&year).unwrap();
-        let monthly_readings = yearly_readings.get(&month).unwrap();
+        let monthly_readings = readings
+            .iter()
+            .filter(|reading| {
+                reading.date.year() as u16 == year && reading.date.month() as u16 == month
+            })
+            .cloned()
+            .collect::<Vec<DailyTemperatureReading>>();
 
         let monthly_calculations = calculate::MonthlyCalculation::calculate(&monthly_readings);
 

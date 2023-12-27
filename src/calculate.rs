@@ -14,20 +14,17 @@ impl YearlyCalculation {
         Self {
             highest_temperature_with_date: monthly_readings
                 .iter()
-                .filter(|reading| reading.max_temperature.is_some())
-                .map(|reading| (reading.date, reading.max_temperature.unwrap()))
+                .map(|reading| (reading.date, reading.max_temperature))
                 .max_by_key(|reading| reading.1)
                 .unwrap(),
             lowest_temperature_with_date: monthly_readings
                 .iter()
-                .filter(|reading| reading.min_temperature.is_some())
-                .map(|reading| (reading.date, reading.min_temperature.unwrap()))
+                .map(|reading| (reading.date, reading.min_temperature))
                 .max_by_key(|reading| reading.1)
                 .unwrap(),
             max_humidity_with_date: monthly_readings
                 .iter()
-                .filter(|reading| reading.max_humidity.is_some())
-                .map(|reading| (reading.date, reading.max_humidity.unwrap()))
+                .map(|reading| (reading.date, reading.max_humidity))
                 .max_by_key(|reading| reading.1)
                 .unwrap(),
         }
@@ -69,30 +66,22 @@ impl MonthlyCalculation {
         Self {
             highest_mean_temperature: daily_readings_for_month
                 .iter()
-                .filter(|reading| reading.mean_temperature.is_some())
-                .max_by_key(|reading| reading.mean_temperature.unwrap())
+                .max_by_key(|reading| reading.mean_temperature)
                 .unwrap()
-                .mean_temperature
-                .unwrap(),
+                .mean_temperature,
             lowest_mean_temperature: daily_readings_for_month
                 .iter()
-                .filter(|reading| reading.mean_temperature.is_some())
-                .min_by_key(|reading| reading.mean_temperature.unwrap())
+                .min_by_key(|reading| reading.mean_temperature)
                 .unwrap()
-                .mean_temperature
-                .unwrap(),
+                .mean_temperature,
             average_humidity: (daily_readings_for_month
                 .iter()
-                .filter(|reading| reading.mean_humidity.is_some())
-                .map(|reading| reading.mean_humidity.unwrap() as u16)
+                .map(|reading| reading.mean_humidity as u16)
                 .sum::<u16>()
                 / daily_readings_for_month.len() as u16) as u8,
             readings_for_chart: daily_readings_for_month
                 .iter()
                 .cloned()
-                .filter(|reading| {
-                    reading.max_temperature.is_some() && reading.min_temperature.is_some()
-                })
                 .collect::<Vec<DailyTemperatureReading>>(),
         }
     }
@@ -106,8 +95,8 @@ impl MonthlyCalculation {
         for reading in self.readings_for_chart.iter() {
             let day_number = reading.date.day0() + 1;
 
-            Self::print_temperature_bar(reading.max_temperature.unwrap(), day_number, "red");
-            Self::print_temperature_bar(reading.min_temperature.unwrap(), day_number, "blue");
+            Self::print_temperature_bar(reading.max_temperature, day_number, "red");
+            Self::print_temperature_bar(reading.min_temperature, day_number, "blue");
         }
     }
 

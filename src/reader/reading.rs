@@ -6,16 +6,16 @@ use serde::Deserialize;
 pub struct DailyTemperatureReading {
     #[serde(rename = "PKT")]
     pub date: NaiveDate,
-    #[serde(deserialize_with = "csv::invalid_option", rename = "Max TemperatureC")]
-    pub max_temperature: Option<i8>,
-    #[serde(deserialize_with = "csv::invalid_option", rename = "Mean TemperatureC")]
-    pub mean_temperature: Option<i8>,
-    #[serde(deserialize_with = "csv::invalid_option", rename = "Min TemperatureC")]
-    pub min_temperature: Option<i8>,
-    #[serde(deserialize_with = "csv::invalid_option", rename = "Max Humidity")]
-    pub max_humidity: Option<u8>,
-    #[serde(deserialize_with = "csv::invalid_option", rename = "Mean Humidity")]
-    pub mean_humidity: Option<u8>,
-    #[serde(deserialize_with = "csv::invalid_option", rename = "Min Humidity")]
-    pub min_humidity: Option<u8>,
+    #[serde(rename = "Max TemperatureC")]
+    pub max_temperature: i8,
+    #[serde(rename = "Mean TemperatureC")]
+    pub mean_temperature: i8,
+    #[serde(rename = "Min TemperatureC")]
+    pub min_temperature: i8,
+    #[serde(rename = "Max Humidity")]
+    pub max_humidity: u8,
+    #[serde(rename = "Mean Humidity")]
+    pub mean_humidity: u8,
+    #[serde(rename = "Min Humidity")]
+    pub min_humidity: u8,
 }
