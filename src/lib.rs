@@ -3,6 +3,7 @@ use chrono::{Datelike, NaiveDate};
 use clap::Parser;
 use colored::Colorize;
 use reader::read_dir;
+use regex::Regex;
 use std::error::Error;
 
 mod calculate;
@@ -13,7 +14,7 @@ mod utils;
 pub struct Arguments {
     #[arg(short = 'e',value_parser = validate_year )]
     /// for a given year display the highest temperature and day, lowest temperature and day, most humid day and humidity
-    pub year: Option<u16>,
+    pub year: Option<i32>,
 
     #[arg(short = 'a', value_parser = validate_date)]
     /// for a given month display the average highest temperature, average lowest temperature, average humidity
@@ -30,10 +31,10 @@ pub struct Arguments {
 }
 
 fn validate_year(year_str: &str) -> Result<u16, String> {
-    for ch in year_str.to_string().chars() {
-        if !ch.is_numeric() || year_str.len() != 4 {
-            return Err("Please provide year in format YYYY".red().to_string());
-        }
+    let regex = Regex::new(r"\d{4}").unwrap();
+
+    if !regex.is_match(year_str) {
+        return Err("Please provide year in format YYYY".red().to_string());
     }
 
     Ok(year_str.parse::<u16>().unwrap())
@@ -57,7 +58,7 @@ pub fn run(args: &Arguments) -> Result<(), Box<dyn Error>> {
     if let Some(year) = args.year {
         let yearly_readings = readings
             .iter()
-            .filter(|reading| reading.date.year() as u16 == year)
+            .filter(|reading| reading.date.year() == year)
             .cloned()
             .collect::<Vec<DailyTemperatureReading>>();
 
@@ -72,9 +73,7 @@ pub fn run(args: &Arguments) -> Result<(), Box<dyn Error>> {
 
         let monthly_readings = readings
             .iter()
-            .filter(|reading| {
-                reading.date.year() as u16 == year && reading.date.month() as u16 == month
-            })
+            .filter(|reading| reading.date.year() == year && reading.date.month() == month)
             .cloned()
             .collect::<Vec<DailyTemperatureReading>>();
 
@@ -89,9 +88,7 @@ pub fn run(args: &Arguments) -> Result<(), Box<dyn Error>> {
 
         let monthly_readings = readings
             .iter()
-            .filter(|reading| {
-                reading.date.year() as u16 == year && reading.date.month() as u16 == month
-            })
+            .filter(|reading| reading.date.year() == year && reading.date.month() == month)
             .cloned()
             .collect::<Vec<DailyTemperatureReading>>();
 
